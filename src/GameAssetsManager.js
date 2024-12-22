@@ -9,7 +9,7 @@ export class GameAssetsManager {
     this.isComplete = false;
     this.scene = scene;
     this.assetContainer = new AssetContainer(this.scene);
-    this.totalAssetsToLoad = 5 + 10;
+    this.totalAssetsToLoad = 9 + 10; // Updated to include alt models
     this.assetsLoaded = 0;
 
     this.loadSounds();
@@ -72,9 +72,10 @@ export class GameAssetsManager {
   }
 
   loadModels() {
+    // Load original models
     this.loadAsset("Alien_1.glb").then((assets) => {
-      assets.meshes[0].rotation = new Vector3(0, 0, 0); // root Mesh
-      assets.meshes[1].position = new Vector3(0, -2000, -2000); // Alien
+      assets.meshes[0].rotation = new Vector3(0, 0, 0);
+      assets.meshes[1].position = new Vector3(0, -2000, -2000);
       this.pushToAssetsContainer(assets.meshes[0]);
       this.pushToAssetsContainer(assets.meshes[1]);
       this.assetsLoaded++;
@@ -99,6 +100,34 @@ export class GameAssetsManager {
       this.checkComplete();
     });
 
+    // Load alternative models
+    this.loadAsset("Alien_1_Alt.glb").then((assets) => {
+      assets.meshes[0].rotation = new Vector3(0, 0, 0);
+      assets.meshes[1].position = new Vector3(0, -2000, -2000);
+      this.pushToAssetsContainer(assets.meshes[0]);
+      this.pushToAssetsContainer(assets.meshes[1]);
+      this.assetsLoaded++;
+      this.checkComplete();
+    });
+
+    this.loadAsset("Alien_2_Alt.glb").then((assets) => {
+      assets.meshes[0].rotation = new Vector3(0, 0, 0);
+      assets.meshes[1].position = new Vector3(0, -2000, -2000);
+      this.pushToAssetsContainer(assets.meshes[0]);
+      this.pushToAssetsContainer(assets.meshes[1]);
+      this.assetsLoaded++;
+      this.checkComplete();
+    });
+
+    this.loadAsset("Alien_3_Alt.glb").then((assets) => {
+      assets.meshes[0].rotation = new Vector3(0, 0, 0);
+      assets.meshes[1].position = new Vector3(0, -2000, -2000);
+      this.pushToAssetsContainer(assets.meshes[0]);
+      this.pushToAssetsContainer(assets.meshes[1]);
+      this.assetsLoaded++;
+      this.checkComplete();
+    });
+
     this.loadAsset("Player_1.glb").then((assets) => {
       assets.meshes[0].rotation = new Vector3(0, 0, 0);
       assets.meshes[1].position = new Vector3(0, -2000, -2000);
@@ -109,6 +138,15 @@ export class GameAssetsManager {
     });
 
     this.loadAsset("MotherShip.glb").then((assets) => {
+      assets.meshes[0].rotation = new Vector3(0, 0, 0);
+      assets.meshes[1].position = new Vector3(0, -2000, -2000);
+      this.pushToAssetsContainer(assets.meshes[0]);
+      this.pushToAssetsContainer(assets.meshes[1]);
+      this.assetsLoaded++;
+      this.checkComplete();
+    });
+
+    this.loadAsset("MotherShip_Alt.glb").then((assets) => {
       assets.meshes[0].rotation = new Vector3(0, 0, 0);
       assets.meshes[1].position = new Vector3(0, -2000, -2000);
       this.pushToAssetsContainer(assets.meshes[0]);

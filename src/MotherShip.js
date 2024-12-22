@@ -10,18 +10,18 @@ export class MotherShip {
     this.enabled = false;
     this.active = false;
     this.lastactivated = Math.floor(Date.now() / 1000) - 1;
+    this.scene = scene;
     this.gameAssets = gameAssets;
     this.interval = spaceinvadersConfig.motherShip.interval;
     this.fireRate = spaceinvadersConfig.motherShip.fireRate;
     this.hitsToKill = spaceinvadersConfig.motherShip.hitsToKill;
     this.velocity = spaceinvadersConfig.motherShip.velocity;
-    this.scene = scene;
+    this.mesh = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "MotherShip_Alt" : "MotherShip");
     this.bullets = [];
     this.enable();
   }
 
   initMotherShipMesh() {
-    this.mesh = this.gameAssets.clone("MotherShip");
     this.mesh.position = new Vector3(-3000, 100, 0);
     this.mesh.metadata = {
       type: "mothership",

@@ -72,9 +72,9 @@ export class AlienFormationController {
   }
 
   buildFormation() {
-    let alien1 = this.gameAssets.clone("Alien_1");
-    let alien2 = this.gameAssets.clone("Alien_2");
-    let alien3 = this.gameAssets.clone("Alien_3");
+    let alien1 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_1_Alt" : "Alien_1");
+    let alien2 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_2_Alt" : "Alien_2");
+    let alien3 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_3_Alt" : "Alien_3");
     let alien = {};
     for (let rc = 0; rc < this.levelParams.rows; rc++) {
       for (let cc = 0; cc < this.levelParams.columns; cc++) {
