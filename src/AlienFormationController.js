@@ -72,30 +72,39 @@ export class AlienFormationController {
   }
 
   buildFormation() {
-    let alien1 = this.gameAssets.clone("Alien_1");
-    let alien2 = this.gameAssets.clone("Alien_2");
-    let alien3 = this.gameAssets.clone("Alien_3");
+    // Create template meshes
+    let alien1 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_1_Alt" : "Alien_1");
+    let alien2 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_2_Alt" : "Alien_2");
+    let alien3 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_3_Alt" : "Alien_3");
+
+    // Move template meshes far away (they'll be used for cloning)
+    alien1.position = new Vector3(0, -2000, -2000);
+    alien2.position = new Vector3(0, -2000, -2000);
+    alien3.position = new Vector3(0, -2000, -2000);
+
     let alien = {};
     for (let rc = 0; rc < this.levelParams.rows; rc++) {
       for (let cc = 0; cc < this.levelParams.columns; cc++) {
         let x = (cc * this.levelParams.spacing.x) - ((this.levelParams.columns - 1) / 2 * this.levelParams.spacing.x);
         let y = (rc * this.levelParams.spacing.y) - ((this.levelParams.rows - 1) / 2 * this.levelParams.spacing.y);
         if (rc < 2) {
-          alien = new Alien(this.scene, alien1);
+          alien = new Alien(this.scene, alien1.clone());
           alien.mesh.metadata.lives = this.levelParams.alien1Lives ?? 0;
           alien.mesh.metadata.scoreValue = 10;
         } else if (rc < 4) {
-          alien = new Alien(this.scene, alien2);
+          alien = new Alien(this.scene, alien2.clone());
           alien.mesh.metadata.lives = this.levelParams.alien2Lives ?? 0;
           alien.mesh.metadata.scoreValue = 20;
         } else {
-          alien = new Alien(this.scene, alien3);
+          alien = new Alien(this.scene, alien3.clone());
           alien.mesh.metadata.lives = this.levelParams.alien3Lives ?? 0;
           alien.mesh.metadata.scoreValue = 30;
         }
 
-        // Scaling
-        alien.mesh.scaling = new Vector3(1.7 - (rc * 0.14), 1.7 - (rc * 0.14), 4 - (rc * 0.14));
+        // Keep original scaling for normal mode, use specific scaling for Holgi Modus
+        if (!spaceinvadersConfig.useAltModels) {
+          alien.mesh.scaling = new Vector3(1.7 - (rc * 0.14), 1.7 - (rc * 0.14), 4 - (rc * 0.14));
+        }
 
         alien.x = x;
         alien.y = y;
@@ -108,6 +117,12 @@ export class AlienFormationController {
         this.aliens.push(alien);
       }
     }
+
+    // Dispose of the template meshes
+    alien1.dispose();
+    alien2.dispose();
+    alien3.dispose();
+
     this.alienCount = this.aliens.length;
     State.formation = 1;
   }
@@ -119,8 +134,20 @@ export class AlienFormationController {
       if (a.id === mesh.id) {
         State.score += mesh.metadata.scoreValue;
 
-        // Bigger aliens have bigger explosions
-        new Explosion(mesh, 20 * mesh.scaling.x, mesh.scaling.x / 1.5, this.scene);
+        // Calculate explosion size based on model type and mode
+        let explosionSize;
+        if (spaceinvadersConfig.useAltModels) {
+          // For Holgi Modus, use larger explosions due to different model scaling
+          explosionSize = mesh.name.includes("Alien_1") ? 1.5 :
+                         mesh.name.includes("Alien_2") ? 2.0 :
+                         mesh.name.includes("Alien_3") ? 1.5 : 1.0;
+        } else {
+          // For normal mode, use scaling-based size
+          explosionSize = mesh.scaling.x / 1.5;
+        }
+
+        // Create explosion with adjusted size
+        new Explosion(mesh, 20 * explosionSize, explosionSize, this.scene);
         this.gameAssets.sounds.alienExplosion.play();
         this.aliens.splice(index, 1);
       }

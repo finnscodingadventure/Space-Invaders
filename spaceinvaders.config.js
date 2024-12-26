@@ -1,5 +1,6 @@
 export default {
   actionCam: false, // This value is changed dynamically in the code based on the users selected mode.
+  useAltModels: false, // This value is changed dynamically in the code based on Holgi Modus
   light: {
     intensity: 1.5
   },
@@ -24,4 +25,12 @@ export default {
   },
   startingLevel: 0, // Starting level -1;
   startingLives: 2,
+  holgiModus: {
+    alienScaling: {
+      alien1: { x: 0.04, y: 0.04, z: 0.04 },
+      alien2: { x: 0.05, y: 0.05, z: 0.05 },
+      alien3: { x: 0.04, y: 0.04, z: 0.04 },
+      motherShip: { x: 0.06, y: 0.06, z: 0.06 }
+    }
+  }
 }

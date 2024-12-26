@@ -5,12 +5,11 @@ export class UIText {
   playAgainPressed = false;
   randNum = Math.floor(Math.random() * 10);
   gameHints = [
-    'You start with a number of lives but if invaders get past you, it\'s game over.',
-    'By 1982, Space Invaders was the highest-grossing entertainment product at the time.',
-    'Alien formations get stronger, larger and more aggressive with each level.',
-    'British paper, The Times, ranked Space Invaders No. 1 on its list of "The ten most influential video games ever".',
-    'Destroy motherships for a huge score bonus.',
-    'Tomohiro Nishikado developed Space Invaders in 1978. His name was never put on the game for contractual reasons.'
+    'Du startest mit 3 Leben. Danach heisst es Game Over Papa!',
+    'In 1982 war Space Invaders das Unterhaltungsprodukt mit dem größten Umsatz.',
+    'Die Aliens werden von Level zu Level stärker!',
+    'Die Zeitung The Times hat das Spiel in die zehn einflussreichsten Spiele aller zeiten aufgenommen.',
+    'Zerstöre das Mutterschiff um einen Bonus zu erhalten'
   ]
 
   constructor() {

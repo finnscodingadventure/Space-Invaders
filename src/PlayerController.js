@@ -76,6 +76,7 @@ export class PlayerController {
   playerHit(mesh) {
     this.disableMovement();
     this.gameAssets.sounds.playerExplosion.play();
+    // Use consistent explosion size regardless of mode
     new Explosion(mesh, 60, 1.1, this.scene);
     this.disableBulletCollisions();
     State.lives--;

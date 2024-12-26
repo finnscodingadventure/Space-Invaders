@@ -1,4 +1,26 @@
 import spaceinvadersConfig from "../spaceinvaders.config";
+
+function parseSelectedMode() {
+  let mode = parseInt(window.localStorage.getItem('mode') ?? 0);
+  document.querySelector("body").classList.add("mode"+mode);
+  switch (mode) {
+    case 0:
+      break;
+    case 1:
+      spaceinvadersConfig.oldSchoolEffects.enabled = true;
+      break;
+    case 2:
+      spaceinvadersConfig.actionCam = true;
+      break;
+    case 3:
+      spaceinvadersConfig.useAltModels = true;
+      console.log("Holgi Modus activated!");
+      break;
+    default:
+      break;
+  }
+}
+
 parseSelectedMode();
 import {Engine} from "@babylonjs/core";
 import {Environment} from "./Environment";
@@ -10,7 +32,6 @@ import {Starfield} from "./Starfield";
 import {GameAssetsManager} from "./GameAssetsManager";
 import {UIText} from "./UIText";
 import {MobileInputs} from "./MobileInputs";
-
 
 const canvas = document.querySelector('canvas');
 const engine = new Engine(canvas, true);
@@ -74,20 +95,3 @@ engine.runRenderLoop(() => {
 window.addEventListener('resize', () => {
   engine.resize();
 });
-
-function parseSelectedMode() {
-  let mode = parseInt(window.localStorage.getItem('mode') ?? 0);
-  document.querySelector("body").classList.add("mode"+mode);
-  switch (mode) {
-    case 0:
-      break;
-    case 1:
-      spaceinvadersConfig.oldSchoolEffects.enabled = true;
-      break;
-    case 2:
-      spaceinvadersConfig.actionCam = true;
-      break;
-    default:
-      break;
-  }
-}

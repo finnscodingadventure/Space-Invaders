@@ -21,7 +21,7 @@ export class MotherShip {
   }
 
   initMotherShipMesh() {
-    this.mesh = this.gameAssets.clone("MotherShip");
+    this.mesh = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "MotherShip_Alt" : "MotherShip");
     this.mesh.position = new Vector3(-3000, 100, 0);
     this.mesh.metadata = {
       type: "mothership",
@@ -32,7 +32,9 @@ export class MotherShip {
     this.mesh.onDispose = (mesh) => {
       if (this.mesh.metadata.silentDispose === undefined) {
         State.score += mesh.metadata.scoreValue;
-        new Explosion(mesh, 60, 1.5, this.scene);
+        // Adjust explosion size based on mode
+        const explosionSize = spaceinvadersConfig.useAltModels ? 2.0 : 1.5;
+        new Explosion(mesh, 60, explosionSize, this.scene);
         this.gameAssets.sounds.motherShipExplosion.play();
       }
       this.gameAssets.sounds.motherShip.stop();
