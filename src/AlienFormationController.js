@@ -17,9 +17,9 @@ export class AlienFormationController {
       x: 9,
       y: 8
     },
-    formationAnimInterval: 1500, //1500 is good start value
+    formationAnimInterval: 1500,
     formationAnimSpeed: 0.2,
-    fireRate: 1, // Avg bullets per second
+    fireRate: 1,
     numBarriers: 3,
     alien1Lives: 0,
     alien2Lives: 0,
@@ -75,6 +75,7 @@ export class AlienFormationController {
     let alien1 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_1_Alt" : "Alien_1");
     let alien2 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_2_Alt" : "Alien_2");
     let alien3 = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "Alien_3_Alt" : "Alien_3");
+
     let alien = {};
     for (let rc = 0; rc < this.levelParams.rows; rc++) {
       for (let cc = 0; cc < this.levelParams.columns; cc++) {
@@ -94,8 +95,10 @@ export class AlienFormationController {
           alien.mesh.metadata.scoreValue = 30;
         }
 
-        // Scaling
-        alien.mesh.scaling = new Vector3(1.7 - (rc * 0.14), 1.7 - (rc * 0.14), 4 - (rc * 0.14));
+        // Only apply this scaling if we're not in Alt mode
+        if (!spaceinvadersConfig.useAltModels) {
+          alien.mesh.scaling = new Vector3(1.7 - (rc * 0.14), 1.7 - (rc * 0.14), 4 - (rc * 0.14));
+        }
 
         alien.x = x;
         alien.y = y;

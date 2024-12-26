@@ -18,6 +18,7 @@ const environment = new Environment(engine);
 const stars = new Starfield(environment.scene);
 const deltaTime = new DeltaTime(environment.scene);
 const gameAssets = new GameAssetsManager(environment.scene);
+window.gameAssets = gameAssets; // Expose for loading progress
 const inputController = new InputController(environment.scene);
 const UI = new UIText();
 const gameController = new GameController(environment, inputController, gameAssets, UI);
@@ -29,44 +30,50 @@ let FPS = 60;
 if (spaceinvadersConfig.oldSchoolEffects.enabled) FPS = 18;
 
 engine.runRenderLoop(() => {
-  if (gameAssets.isComplete) {
-    switch (State.state) {
-      case "LOADING":
-        break;
-      case "TITLESCREEN":
-        gameController.titleScreen();
-        break;
-      case "STARTGAME":
-        Engine.audioEngine.unlock();
-        gameController.startGame();
-        break;
-      case "NEXTLEVEL":
-        gameController.nextLevel();
-        break;
-      case "GAMELOOP":
-        gameController.checkStates();
-        break;
-      case "ALIENSWIN":
-        gameController.aliensWin();
-        break;
-      case "CLEARLEVEL":
-        gameController.clearLevel();
-        break;
-      case "GAMEOVER":
-        gameController.gameOver();
-        break;
-      default:
-        // does nothing.
-        break;
+  try {
+    if (gameAssets.isComplete) {
+      switch (State.state) {
+        case "LOADING":
+          break;
+        case "TITLESCREEN":
+          gameController.titleScreen();
+          break;
+        case "STARTGAME":
+          Engine.audioEngine.unlock();
+          gameController.startGame();
+          break;
+        case "NEXTLEVEL":
+          gameController.nextLevel();
+          break;
+        case "GAMELOOP":
+          gameController.checkStates();
+          break;
+        case "ALIENSWIN":
+          gameController.aliensWin();
+          break;
+        case "CLEARLEVEL":
+          gameController.clearLevel();
+          break;
+        case "GAMEOVER":
+          gameController.gameOver();
+          break;
+        default:
+          // does nothing.
+          break;
+      }
+      // Force a low FPS if required by oldSchoolEffects mode.
+      let timeNow = Date.now();
+      while (timeNow - lastRenderTime < 1000 / FPS) {
+        timeNow = Date.now()
+      }
+      lastRenderTime = timeNow;
+      window.scrollTo(0, 0);
+      environment.scene.render();
+    } else {
+      console.log('Waiting for assets to load...', gameAssets.assetsLoaded, 'of', gameAssets.totalAssetsToLoad);
     }
-    // Force a low FPS if required by oldSchoolEffects mode.
-    let timeNow = Date.now();
-    while (timeNow - lastRenderTime < 1000 / FPS) {
-      timeNow = Date.now()
-    }
-    lastRenderTime = timeNow;
-    window.scrollTo(0, 0);
-    environment.scene.render();
+  } catch (error) {
+    console.error('Error in game loop:', error);
   }
 });
 

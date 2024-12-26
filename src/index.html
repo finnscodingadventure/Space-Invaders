@@ -71,7 +71,7 @@
     </div>
   </div>
 </div>
-<div id="loading" class="active">LADEN<br/>...</div>
+<div id="loading" class="active">LADEN<br/>...<br/><span id="loading-progress">0%</span></div>
 <div id="intro" class="">
   <p>Select mode<br/><select id="change-mode">
     <option value="0">2D Modus</option>
@@ -93,6 +93,11 @@
   function loading() {
     setTimeout(function () {
       let el = document.querySelector("#loading")
+      let progress = document.querySelector("#loading-progress");
+      if (window.gameAssets) {
+        const percent = Math.floor((window.gameAssets.assetsLoaded / window.gameAssets.totalAssetsToLoad) * 100);
+        progress.textContent = percent + '%';
+      }
       el.append(".");
       if (el.classList.contains("active")) {
         loading();

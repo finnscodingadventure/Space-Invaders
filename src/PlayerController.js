@@ -24,8 +24,14 @@ export class PlayerController {
   initPlayer() {
     this.playerMesh = this.gameAssets.clone("Player_1");
     this.playerMesh.position = new Vector3(0, 0, 0);
+    
+    // Collision setup similar to Barrier
+    this.playerMesh.checkCollisions = false;
+    this.playerMesh.collisionGroup = 1;  // 00001
+    this.playerMesh.collisionMask = 10;  // 01010 - Should collide with aliens and alien bullets
     this.playerMesh.metadata = {
-      type: "player"
+      type: "player",
+      lives: 3
     }
     this.playerMesh.onDispose = (mesh) => {
       if (State.state === "GAMELOOP" || State.state === "ALIENSWIN") {
@@ -33,9 +39,10 @@ export class PlayerController {
         this.scene.onBeforeRenderObservable.remove(this.playerObserver);
       }
     };
-    this.playerMesh.checkCollisions = false;
-    this.playerMesh.collisionGroup = 1
-    this.playerMesh.collisionMask = 1;
+    // Critical: Set up collision ellipsoid
+    this.playerMesh.ellipsoid = new Vector3(2, 2, 2);
+    this.playerMesh.ellipsoidOffset = new Vector3(0, 0, 0);
+    this.playerMesh.computeWorldMatrix(true);
     this.setInvicibility(true, 3000);
     this.enableMovement();
     this.playerObserver = this.scene.onBeforeRenderObservable.add(()=>{
@@ -71,20 +78,41 @@ export class PlayerController {
 
   enableCollisions() {
     this.playerMesh.checkCollisions = true;
+    // Add this line to ensure collision state is up to date
+    this.playerMesh.computeWorldMatrix(true);
   }
 
-  playerHit(mesh) {
-    this.disableMovement();
-    this.gameAssets.sounds.playerExplosion.play();
-    new Explosion(mesh, 60, 1.1, this.scene);
-    this.disableBulletCollisions();
-    State.lives--;
-    if (State.lives > -1) {
-      setTimeout(() => {
-        this.initPlayer();
-      }, 2000)
-    } else {
+  playerHit(bulletMesh) {
+    // Reduce player lives
+    if (this.playerMesh.metadata.lives > 0) {
+      this.playerMesh.metadata.lives--;
+      
+      // Optional: Add visual or sound effect for player hit
+      if (this.gameAssets && this.gameAssets.sounds) {
+        this.gameAssets.sounds.playerExplosion.play();
+      }
+      
+      // Dispose of the bullet that hit the player
+      if (bulletMesh) {
+        bulletMesh.dispose();
+      }
+      
+      // Check if player is out of lives
+      if (this.playerMesh.metadata.lives <= 0) {
+        this.gameOver();
+      }
+    }
+  }
+
+  gameOver() {
+    // Implement game over logic
+    if (State) {
       State.state = "GAMEOVER";
+    }
+    
+    // Dispose of player mesh
+    if (this.playerMesh) {
+      this.playerMesh.dispose();
     }
   }
 

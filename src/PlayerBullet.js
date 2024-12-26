@@ -5,9 +5,10 @@ import State from "./State";
 
 export class PlayerBullet {
 
-  constructor(gameAssets, scene, playerMesh) {
+  constructor(gameAssets, scene, playerMesh, gameManager) {
     this.scene = scene;
     this.gameAssets = gameAssets;
+    this.gameManager = gameManager;
     this.maxY = 120;
     if (spaceinvadersConfig.actionCam) {
       this.maxY = 400;
@@ -24,10 +25,23 @@ export class PlayerBullet {
       playerMesh.position.y + this.offset,
       playerMesh.position.z
     );
-    this.bullet.metadata = {"type": "playerbullet"};
-    this.bullet.collisionGroup = 4;
-    this.bullet.collisionMask = 18;
+    
+    // Collision setup similar to Barrier
+    this.initBullet();
+    
     this.startBulletLoop();
+  }
+
+  initBullet() {
+    this.bullet.metadata = {"type": "playerbullet"};
+    this.bullet.collisionGroup = 4;   // 00100
+    this.bullet.collisionMask = 2;    // 00010 - Should collide with aliens
+    this.bullet.checkCollisions = true;
+    this.bullet.collisionResponse = true;  // Allow response
+    this.bullet.collisionRetryCount = 10;
+    this.bullet.ellipsoid = new Vector3(0.5, 2, 1);
+    this.bullet.ellipsoidOffset = new Vector3(0, 0, 0);
+    this.bullet.computeWorldMatrix(true);
   }
 
   startBulletLoop() {
@@ -36,49 +50,39 @@ export class PlayerBullet {
       if (this.bullet.position.y > this.maxY) {
         this.destroyBullet();
       }
-      if (this.bullet.collider.collidedMesh) {
-        this.handleCollision();
+      if (this.bullet.collider && this.bullet.collider.collidedMesh) {
+        console.log('Bullet collision detected:', {
+          colliderType: this.bullet.collider.collidedMesh.metadata?.type,
+          colliderName: this.bullet.collider.collidedMesh.name,
+          colliderGroup: this.bullet.collider.collidedMesh.collisionGroup,
+          bulletGroup: this.bullet.collisionGroup,
+          bulletMask: this.bullet.collisionMask
+        });
+        this.onCollision(this.bullet.collider.collidedMesh);
       }
       this.bullet.checkCollisions = true;
     });
   }
 
-  handleCollision() {
-    let collidedWithType = (this.bullet.collider.collidedMesh.metadata).type;
-
-    // If the collidedMesh has lives, destroy the bullet and subtract a life and exit the function
-    if (this.bullet.collider.collidedMesh.metadata?.lives > 0) {
-      this.bullet.collider.collidedMesh.metadata.lives -= 1;
-
-      if (spaceinvadersConfig.oldSchoolEffects.enabled) {
-        if (this.bullet.collider.collidedMesh.metadata.type ==="mothership"){
-          this.bullet.collider.collidedMesh.rotate(Axis.Z, Scalar.RandomRange(-0.25, 0.25), Space.WORLD);
-
-        }else {
-          this.bullet.collider.collidedMesh.rotate(Axis.Z, Scalar.RandomRange(-0.25, 0.25), Space.LOCAL);
-        }
-      } else {
-        this.bullet.collider.collidedMesh.rotate(Axis.X, Scalar.RandomRange(-0.3, 0.3), Space.LOCAL);
+  onCollision(collidedMesh) {
+    // Check if the collided mesh is an alien
+    if (collidedMesh.metadata && collidedMesh.metadata.type === 'alien') {
+      // Attempt to call onHit method if it exists
+      const alienObject = this.findAlienObject(collidedMesh);
+      if (alienObject && typeof alienObject.onHit === 'function') {
+        alienObject.onHit();
       }
-      new Explosion(this.bullet, 10, 1, this.scene);
+      
+      // Dispose of the bullet
       this.destroyBullet();
-      this.gameAssets.sounds.alienExplosion.play(0, 0.15, 1);
-      return;
     }
+  }
 
-    // No lives left so destroy the collidedMesh.
-    if (collidedWithType === "alien") {
-      this.bullet.collider.collidedMesh.dispose(); // perform action with meshes onDispose event.
-      this.destroyBullet();
-    }
-    if (collidedWithType === "barrier") {
-      this.bullet.collider.collidedMesh.dispose(); // perform action with meshes onDispose event.
-      this.destroyBullet();
-    }
-    if (collidedWithType === "mothership") {
-      this.bullet.collider.collidedMesh.dispose(); // perform action with meshes onDispose event.
-      this.destroyBullet();
-    }
+  // Helper method to find the Alien object associated with the mesh
+  findAlienObject(mesh) {
+    // This assumes there's a way to track Alien instances
+    // You might need to implement a global tracking mechanism in your game manager
+    return this.gameManager ? this.gameManager.getAlienByMesh(mesh) : null;
   }
 
   destroyBullet() {

@@ -3,8 +3,9 @@ import State from "./State";
 
 export class AlienBullet {
 
-  constructor(scene, playerMesh) {
+  constructor(scene, playerMesh, gameManager) {
     this.scene = scene;
+    this.gameManager = gameManager;
     this.minY = -30;
     this.offset = -2;
     this.bulletSpeed = -0.5;
@@ -21,8 +22,10 @@ export class AlienBullet {
     let bulletArc = Math.PI/6;
     this.bullet.rotate(new Vector3(0, 0, 1), (Math.random() * bulletArc) - bulletArc/2);
     this.bullet.checkCollisions = true;
-    this.bullet.collisionGroup = 8;
-    this.bullet.collisionMask = 17;
+    this.bullet.collisionGroup = 8;   // 01000
+    this.bullet.collisionMask = 1;    // 00001 - Should collide with player
+    this.bullet.collisionResponse = true;
+    this.bullet.metadata = { type: "alienbullet" };
 
     this.startBulletLoop();
   }
@@ -35,22 +38,31 @@ export class AlienBullet {
         this.destroyBullet();
       }
       if (this.bullet.collider.collidedMesh) {
-        this.handleCollision();
+        this.onCollision(this.bullet.collider.collidedMesh);
       }
 
     });
   }
 
-  handleCollision() {
-    let collidedWithType = (this.bullet.collider.collidedMesh.metadata).type;
-    if (collidedWithType === "player") {
-      this.bullet.collider.collidedMesh.dispose(); // perform action with player meshes onDispose event.
+  onCollision(collidedMesh) {
+    // Check if the collided mesh is the player
+    if (collidedMesh.metadata && collidedMesh.metadata.type === 'player') {
+      // Attempt to call playerHit method if it exists
+      const playerController = this.findPlayerController(collidedMesh);
+      if (playerController && typeof playerController.playerHit === 'function') {
+        playerController.playerHit(this.bullet);
+      }
+      
+      // Dispose of the bullet
       this.destroyBullet();
     }
-    if (collidedWithType === "barrier") {
-      this.bullet.collider.collidedMesh.dispose();
-      this.destroyBullet();
-    }
+  }
+
+  // Helper method to find the PlayerController associated with the mesh
+  findPlayerController(mesh) {
+    // This assumes there's a way to track the PlayerController
+    // You might need to implement a global tracking mechanism in your game manager
+    return this.gameManager ? this.gameManager.getPlayerController() : null;
   }
 
   destroyBullet() {

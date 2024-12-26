@@ -16,30 +16,25 @@ export class MotherShip {
     this.fireRate = spaceinvadersConfig.motherShip.fireRate;
     this.hitsToKill = spaceinvadersConfig.motherShip.hitsToKill;
     this.velocity = spaceinvadersConfig.motherShip.velocity;
-    this.mesh = this.gameAssets.clone(spaceinvadersConfig.useAltModels ? "MotherShip_Alt" : "MotherShip");
+    this.mesh = null;
     this.bullets = [];
     this.enable();
   }
 
   initMotherShipMesh() {
-    this.mesh.position = new Vector3(-3000, 100, 0);
-    this.mesh.metadata = {
-      type: "mothership",
-      scoreValue: 1000,
-      lives: this.hitsToKill,
-      frameCounter: 0 // Used in orthographic camera mode
+    const meshName = spaceinvadersConfig.useAltModels ? "MotherShip_Alt" : "MotherShip";
+    this.mesh = this.gameAssets.clone(meshName);
+    if (this.mesh) {
+      this.mesh.position = new Vector3(-3000, 100, 0);
+      this.mesh.metadata = {
+        type: "mothership",
+        scoreValue: 1000,
+        lives: this.hitsToKill,
+        frameCounter: 0
+      };
+    } else {
+      console.error(`Failed to clone MotherShip mesh: ${meshName}`);
     }
-    this.mesh.onDispose = (mesh) => {
-      if (this.mesh.metadata.silentDispose === undefined) {
-        State.score += mesh.metadata.scoreValue;
-        new Explosion(mesh, 60, 1.5, this.scene);
-        this.gameAssets.sounds.motherShipExplosion.play();
-      }
-      this.gameAssets.sounds.motherShip.stop();
-      this.deactivate();
-    }
-    this.mesh.checkCollisions = true;
-    this.mesh.collisionGroup = 2;
   }
 
   fireBullets() {
