@@ -240,11 +240,6 @@ export class GameAssetsManager {
     }
   }
 
-  pushToAssetsContainer(mesh) {
-    console.log(`Adding mesh to container: ${mesh.name}`);
-    this.assetContainer.meshes.push(mesh);
-  }
-
   clone(meshName) {
     try {
       const isAltModel = meshName.includes("_Alt");
@@ -278,13 +273,25 @@ export class GameAssetsManager {
     }
   }
 
+  pushToAssetsContainer(mesh) {
+    console.log(`Adding mesh to container: ${mesh.name}`);
+    this.assetContainer.meshes.push(mesh);
+  }
+
   checkComplete() {
     if (this.assetsLoaded > this.totalAssetsToLoad - 1) {
-      // Must call removeAllFromSceneon next tick for some reason
+      // Must call removeAllFromScene on next tick for some reason
       setTimeout(() => {
         this.assetContainer.removeAllFromScene();
         this.isComplete = true;
       }, 1);
     }
+  }
+
+  hideTemplateMeshes() {
+    // Hide template meshes by setting visibility to 0 instead of removing them
+    this.assetContainer.meshes.forEach(mesh => {
+      mesh.visibility = 0;
+    });
   }
 }

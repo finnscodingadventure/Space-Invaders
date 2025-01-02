@@ -134,22 +134,24 @@ export class AlienFormationController {
       if (a.id === mesh.id) {
         State.score += mesh.metadata.scoreValue;
 
-        // Calculate explosion size based on model type and mode
+        // Use smaller explosions in Holgi Modus to reduce particle count
         let explosionSize;
         if (spaceinvadersConfig.useAltModels) {
-          // For Holgi Modus, use larger explosions due to different model scaling
-          explosionSize = mesh.name.includes("Alien_1") ? 1.5 :
-                         mesh.name.includes("Alien_2") ? 2.0 :
-                         mesh.name.includes("Alien_3") ? 1.5 : 1.0;
+          // Reduced explosion sizes for better performance
+          explosionSize = mesh.name.includes("Alien_1") ? 0.5 :
+                         mesh.name.includes("Alien_2") ? 0.75 :
+                         mesh.name.includes("Alien_3") ? 0.5 : 0.4;
         } else {
-          // For normal mode, use scaling-based size
+          // Keep original explosion sizes for normal mode
           explosionSize = mesh.scaling.x / 1.5;
         }
 
-        // Create explosion with adjusted size
-        new Explosion(mesh, 20 * explosionSize, explosionSize, this.scene);
+        // Create explosion with fewer particles in Holgi Modus
+        const particleCount = spaceinvadersConfig.useAltModels ? 10 : 20;
+        new Explosion(mesh, particleCount * explosionSize, explosionSize, this.scene);
         this.gameAssets.sounds.alienExplosion.play();
         this.aliens.splice(index, 1);
+        break; // Exit loop early once we found the alien
       }
       index++;
     }
@@ -157,19 +159,25 @@ export class AlienFormationController {
   }
 
   setLoop() {
-    this.formationAnimInterval = this.levelParams.formationAnimInterval;
-    this.formationAnimSpeed = this.levelParams.formationAnimSpeed / 2;
+    // Adjust animation intervals based on mode
+    const modeMultiplier = spaceinvadersConfig.useAltModels ? 1.5 : 1.0;
+    this.formationAnimInterval = this.levelParams.formationAnimInterval * modeMultiplier;
+    this.formationAnimSpeed = (this.levelParams.formationAnimSpeed / 2) * modeMultiplier;
+    
     this.formationAnimTick = setTimeout(() => {
-      this.formationAnimSpeed = this.levelParams.formationAnimSpeed;
+      this.formationAnimSpeed = this.levelParams.formationAnimSpeed * modeMultiplier;
       this.moveFormation();
       this.movementStarted = true;
     }, 3000);
+    
+    // Reduce update frequency in Holgi Modus
+    const priority = spaceinvadersConfig.useAltModels ? 2 : 1;
     this.formationObserver = this.scene.onBeforeRenderObservable.add(() => {
       this.updateAlienMeshPositions();
       if (this.movementStarted) {
         this.fireBullets();
       }
-    }, 1);
+    }, priority);
   }
 
   fireBullets() {

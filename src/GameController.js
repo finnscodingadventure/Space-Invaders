@@ -181,10 +181,16 @@ export class GameController {
       this.alienFormation.motherShip.destroyMotherShip();
       this.alienFormation.clearScene();
       delete this.alienFormation;
-      // final cleanup to ensure everything has been disposed of.
-      while (this.scene.meshes.length) {
-        this.scene.meshes[0].dispose();
+      
+      // Only dispose of non-template meshes
+      const meshesToKeep = ["Alien_1", "Alien_2", "Alien_3", "Alien_1_Alt", "Alien_2_Alt", "Alien_3_Alt", "Player_1", "MotherShip", "MotherShip_Alt"];
+      for (let i = this.scene.meshes.length - 1; i >= 0; i--) {
+        const mesh = this.scene.meshes[i];
+        if (!meshesToKeep.some(name => mesh.name.startsWith(name))) {
+          mesh.dispose();
+        }
       }
+
       if (State.state === "GAMEOVER") {
         State.gameOverStep += 1;
       } else {

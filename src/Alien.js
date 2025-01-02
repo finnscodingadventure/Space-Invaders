@@ -38,9 +38,14 @@ export class Alien extends AliensController {
     this.mesh.position.x = this.x;
     this.mesh.position.y = this.y;
     this.mesh.position.z = this.z;
-    this.mesh.checkCollisions = true;
-    this.mesh.collisionGroup = 2;
-    this.mesh.collisionMask = 17;
+    
+    // Only enable collision detection in normal mode
+    if (!this.mesh.name.includes("_Alt")) {
+      this.mesh.checkCollisions = true;
+      this.mesh.collisionGroup = 2;
+      this.mesh.collisionMask = 17;
+    }
+    
     this.mesh.metadata = {
       type: "alien",
       scoreValue: 10
@@ -53,15 +58,19 @@ export class Alien extends AliensController {
       x: this.formation.x + this.x,
       y: this.formation.y + this.y
     }
-    //this.mesh.position.x = Scalar.Lerp(currentPosition.x, newPosition.x, v);
-    //this.mesh.position.y = Scalar.Lerp(currentPosition.y, newPosition.y, v);
-    let newX = Scalar.Lerp(currentPosition.x, newPosition.x, v);
-    let newY = Scalar.Lerp(currentPosition.y, newPosition.y, v);
-    let scalarX = newX - currentPosition.x;
-    let scalarY = newY - currentPosition.y;
-    this.mesh.moveWithCollisions(new Vector3(scalarX, scalarY, currentPosition.z));
-    if (this.mesh.collider.collidedMesh) {
-      this.handleCollision();
+    
+    // For Holgi Modus (Alt models), use direct position updates instead of collision checks
+    if (this.mesh.name.includes("_Alt")) {
+      this.mesh.position.x = Scalar.Lerp(currentPosition.x, newPosition.x, v);
+      this.mesh.position.y = Scalar.Lerp(currentPosition.y, newPosition.y, v);
+    } else {
+      // Normal mode with collision detection
+      let scalarX = Scalar.Lerp(currentPosition.x, newPosition.x, v) - currentPosition.x;
+      let scalarY = Scalar.Lerp(currentPosition.y, newPosition.y, v) - currentPosition.y;
+      this.mesh.moveWithCollisions(new Vector3(scalarX, scalarY, currentPosition.z));
+      if (this.mesh.collider.collidedMesh) {
+        this.handleCollision();
+      }
     }
 
     return newPosition;
